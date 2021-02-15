@@ -105,26 +105,38 @@ class MemeDataset(data.Dataset):
     def _load_img_feature(self, img_id, normalize=False):
         # img_id = self._expand_id(img_id)
         img_feat = np.load(f'{self.basepath}/own_features/{img_id}.npy')
-        img_feat_info = np.load(f'{self.basepath}/own_features/{img_id}_info.npy', allow_pickle=True)
+        img_feat_info = np.load(f'{self.basepath}/own_features/{img_id}_info.npy', allow_pickle=True).item()
 
-        print(self.data.img_feat[0])
-        print('-'*50)
-        print(self.data.img_feat_info[0])
-        # hier moet je wezen hannah
         # YOUR CODE HERE:  get the x and y coordinates from 'img_feat_info['bbox']'
-        raise SystemExit(0)
-        
+        coordinates = img_feat_info['bbox']
+        img_width = img_feat_info['image_w']
+        img_height = img_feat_info['image_h']
+
+        # raise SystemExit(0)
+        x1 = coordinates[:, 0]
+        y1 = coordinates[:, 1]
+        x2 = coordinates[:, 2]
+        y2 = coordinates[:, 3]
+
         if normalize:
-            pass
             # TODO: implement this
             # YOUR CODE HERE:  normalize the coordinates with image width and height
 
-        # YOUR CODE HERE:  calculate the width and height of the bbs from their x,y coordinates
+            # bbox coordinate: left, bottom, right, top ?
+            x1 /= image_w
+            y1 /= image_h
+            x2 /= image_w
+            y2 /= image_h
 
-        
+        # YOUR CODE HERE:  calculate the width and height of the bbs from their x,y coordinates
+        w = x2 - x1
+        h = y2 - y1
+        product = w*h
+
         # YOUR CODE HERE:  prepare the 'img_pos_feat' as a 7-dim tensor of x1, y1, x2, y2, w, h, w*h
-        return
-        #return img_feat, img_pos_feat
+        img_pos_feat = np.stack((x1, y1, x2, y2, w, h, product)).T
+
+        return img_feat, img_pos_feat
 
     
     
