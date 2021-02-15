@@ -6,6 +6,7 @@ from PIL import Image
 from types import SimpleNamespace
 import logging
 import matplotlib.pyplot as plt
+import json
 
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s - %(message)s',
@@ -52,7 +53,10 @@ class MemeDataset(data.Dataset):
         assert self.filepath.endswith(".jsonl"), "The filepath requires a JSON list file (\".jsonl\"). Please correct the given filepath \"%s\"" % self.filepath
         self.basepath = self.filepath.rsplit("/",1)[0]
         # YOUR CODE HERE:  Load jsonl file as list of JSON objects stored in 'self.json_list
-        
+        self.json_list = []
+        with open(self.filepath, 'r') as f:
+            for line in f.readlines():
+                self.json_list.append(json.loads(line))
         self._load_dataset()
 
     
@@ -63,44 +67,64 @@ class MemeDataset(data.Dataset):
         self.data = SimpleNamespace(ids=None, imgs=None, labels=None, text=None)
 
         # YOUR CODE HERE:  load the object lists from self.json_list
-        self.data.ids = # fill me
-        self.data.labels = # fill me
-        self.data.text = # fill me
-        self.data.imgs = # fill me
+        self.data.ids = [self._expand_id(str(entry['id'])) for entry in self.json_list]
+        self.data.labels = [entry['label'] for entry in self.json_list]
+        self.data.text = [entry['text'] for entry in self.json_list]
+        self.data.imgs = [entry['img'] for entry in self.json_list]
 
-        # YOUR CODE HERE:  Check if all image features' and image features' info files exist
+        for img, id in zip(self.data.imgs, self.data.ids):
+            # npy feature files are prepended with 0s, here we adjust our id's to match those files
+
+            if not os.path.isfile(f'{self.basepath}/{img}'):
+                raise ValueError(f'Image number {id} should be located at {img} but does not exist.')
+
+            img_feature_loc = f'{self.basepath}/own_features/{id}.npy'
+            img_feature_info_loc = f'{self.basepath}/own_features/{id}_info.npy'
+
+            if not os.path.isfile(img_feature_loc) or not os.path.isfile(img_feature_info_loc):
+                raise ValueError(f'Either the image features or image features info for image {id} is missing. '
+                                 f'It should be located at {img_feature_loc} and {img_feature_info_loc}')
+
         # YOUR CODE HERE:  Iterate over data ids and load img_feats and img_pos_feats into lists (defined above) using _load_img_feature
-        
+        self.data.img_feat, self.data.img_feat_info = [], []
+        for id in self.data.ids:
+            img_feat, img_pos_feat = self._load_img_feature(id)
+
         # Preprocess text if selected
         if self.text_preprocess is not None:
             self.data.text = self.text_preprocess(self.data.text)
 
     
     def __len__(self):
-        # YOUR CODE HERE:  mandatory. 
-        raise NotImplementedError
+        return len(self.json_list)
 
 
     def _expand_id(self, img_id):
-        # YOUR CODE HERE:  Add trailing zeros to the given id (check file names) using zfill
-        raise NotImplementedError
-
+        return img_id.zfill(5)
 
     def _load_img_feature(self, img_id, normalize=False):
-        img_id = self._expand_id(img_id)
-        # YOUR CODE HERE:  Load image features and image feats info in 'img_feat' and 'img_feat_info' (i.e., .npy and _info.npy files) using _load_img_feature
+        # img_id = self._expand_id(img_id)
+        img_feat = np.load(f'{self.basepath}/own_features/{img_id}.npy')
+        img_feat_info = np.load(f'{self.basepath}/own_features/{img_id}_info.npy', allow_pickle=True)
 
+        print(self.data.img_feat[0])
+        print('-'*50)
+        print(self.data.img_feat_info[0])
+        # hier moet je wezen hannah
         # YOUR CODE HERE:  get the x and y coordinates from 'img_feat_info['bbox']'
-        
+        raise SystemExit(0)
         
         if normalize:
+            pass
+            # TODO: implement this
             # YOUR CODE HERE:  normalize the coordinates with image width and height
 
-        # YOUR CODE HERE:  calculate the width and height of the bbs from their x,y coordinates 
+        # YOUR CODE HERE:  calculate the width and height of the bbs from their x,y coordinates
+
         
         # YOUR CODE HERE:  prepare the 'img_pos_feat' as a 7-dim tensor of x1, y1, x2, y2, w, h, w*h
-
-        return img_feat, img_pos_feat
+        return
+        #return img_feat, img_pos_feat
 
     
     
