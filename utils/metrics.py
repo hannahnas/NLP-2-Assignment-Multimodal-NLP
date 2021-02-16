@@ -27,6 +27,13 @@ def standard_metrics_binary(probs, labels, threshold=0.5, add_aucroc=True, add_o
     Returned values are floats (no tensors) in the dictionary 'metrics'.
     Probabilities and labels are expected to be pytorch tensors.
     """
+    preds = torch.where(probs < threshold, 0, 1)
+    correct = torch.count_nonzero(preds.eq(labels))
+    acc = correct/len(probs)
+    recall = correct/torch.count_nonzero(labels)
+    precision = correct/torch.count_nonzero(preds)
+    f1 = 2 * (precision*recall)/(precision+recall)
+    auroc = 'joe'
     # YOUR CODE HERE:  write code to calculate accuracy, precision, recall, F1 and auroc. Return in the dictionary 'metrics'
 
     return metrics
@@ -54,9 +61,8 @@ def aucroc(probs, labels):
 
 
 if __name__ == '__main__':
-
-    num_classes = 4
+    num_classes = 2
     probs = torch.randn(size=(1000,num_classes))
     probs = F.softmax(probs, dim=-1)
     labels = torch.multinomial(probs, num_samples=1).squeeze() * 0
-    print("Metrics", standard_metrics(probs, labels))
+    print("Metrics", standard_metrics(probs[:, 1], labels))

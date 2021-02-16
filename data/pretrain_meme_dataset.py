@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 from data.meme_dataset import MemeDataset
 from utils.utils import get_attention_mask, get_device, pad_tensors, get_gather_index
 
-
 """
 In case you want to experiment with pretraining tasks, this is a good starting point. 
 Inherit the 'Pretrain_MemeDataset' class and build upon it for the different pre-training tasks. 
@@ -95,5 +94,4 @@ class Pretrain_MemeDataset(MemeDataset):
         
         assert len(self.json_list) == lens, "Size of the combined train and dev_seen dataset does not match the sum of their individual sizes"
         self._load_dataset()
-
 
