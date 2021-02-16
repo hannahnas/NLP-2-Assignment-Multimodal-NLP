@@ -103,7 +103,6 @@ class MemeDataset(data.Dataset):
         return img_id.zfill(5)
 
     def _load_img_feature(self, img_id, normalize=False):
-        # img_id = self._expand_id(img_id)
         img_feat = np.load(f'{self.basepath}/own_features/{img_id}.npy')
         img_feat_info = np.load(f'{self.basepath}/own_features/{img_id}_info.npy', allow_pickle=True).item()
 
