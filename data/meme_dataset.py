@@ -69,26 +69,26 @@ class MemeDataset(data.Dataset):
         # YOUR CODE HERE:  load the object lists from self.json_list
         self.data.ids = [self._expand_id(str(entry['id'])) for entry in self.json_list]
         self.data.labels = [entry['label'] for entry in self.json_list]
-        self.data.text = [entry['text'] for entry in self.json_list]
+        self.data.texts = [entry['text'] for entry in self.json_list]
         self.data.imgs = [entry['img'] for entry in self.json_list]
 
-        for img, id in zip(self.data.imgs, self.data.ids):
+        for (idx, img) in zip(self.data.ids, self.data.imgs):
             # npy feature files are prepended with 0s, here we adjust our id's to match those files
 
             if not os.path.isfile(f'{self.basepath}/{img}'):
-                raise ValueError(f'Image number {id} should be located at {img} but does not exist.')
+                raise ValueError(f'Image number {idx} should be located at {img} but does not exist.')
 
-            img_feature_loc = f'{self.basepath}/own_features/{id}.npy'
-            img_feature_info_loc = f'{self.basepath}/own_features/{id}_info.npy'
+            img_feature_loc = f'{self.basepath}/own_features/{idx}.npy'
+            img_feature_info_loc = f'{self.basepath}/own_features/{idx}_info.npy'
 
             if not os.path.isfile(img_feature_loc) or not os.path.isfile(img_feature_info_loc):
-                raise ValueError(f'Either the image features or image features info for image {id} is missing. '
+                raise ValueError(f'Either the image features or image features info for image {idx} is missing. '
                                  f'It should be located at {img_feature_loc} and {img_feature_info_loc}')
 
         # YOUR CODE HERE:  Iterate over data ids and load img_feats and img_pos_feats into lists (defined above) using _load_img_feature
         self.data.img_feat, self.data.img_feat_info = [], []
-        for id in self.data.ids:
-            img_feat, img_pos_feat = self._load_img_feature(id)
+        for idx in self.data.ids:
+            img_feat, img_pos_feat = self._load_img_feature(idx)
 
         # Preprocess text if selected
         if self.text_preprocess is not None:
@@ -143,6 +143,11 @@ class MemeDataset(data.Dataset):
         # YOUR CODE HERE:  write the return of one item of the batch conataining the elements denoted in the return statement
         # HINT: use _load_img_feature
 
+        data_id = self.data.ids[idx]
+        text = self.data.texts[idx]
+        label = self.data.labels[idx]
+        img_feat, img_pos_feat = self._load_img_feature(data_id)
+
         return {
             'img_feat': img_feat,
             'img_pos_feat': img_pos_feat,
@@ -161,14 +166,20 @@ class MemeDataset(data.Dataset):
         def collate_fn(samples):
             # samples is a list of dictionaries of the form returned by __get_item__()
             # YOUR CODE HERE: Create separate lists for each element by unpacking
+            img_features = [sample['img_feat'] for sample in samples]
+            img_pos_features = [sample['img_pos_feat'] for sample in samples]
+            texts = [sample['text'] for sample in samples]
+            labels = [sample['label'] for sample in samples]
 
             # YOUR CODE HERE:  Pad 'img_feat' and 'img_pos_feat' tensors using pad_sequence
+
 
             # Tokenize and pad text
             if self.text_padding is not None:
                 texts = self.text_padding(texts)
             
             # YOUR CODE HERE:  Stack labels and data_ids into tensors (list --> tensor)
+            
 
             # Text input
             input_ids = texts['input_ids']
