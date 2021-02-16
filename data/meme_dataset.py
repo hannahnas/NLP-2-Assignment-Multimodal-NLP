@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import logging
 import matplotlib.pyplot as plt
 import json
-
+from torch.nn.utils.rnn import pad_sequence
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s - %(message)s',
                     datefmt='%d/%m/%Y %I:%M:%S %p',
@@ -47,7 +47,6 @@ class MemeDataset(data.Dataset):
         self._prepare_data_list()
 
     
-    
     def _prepare_data_list(self):
         # Check filepath
         assert self.filepath.endswith(".jsonl"), "The filepath requires a JSON list file (\".jsonl\"). Please correct the given filepath \"%s\"" % self.filepath
@@ -59,9 +58,8 @@ class MemeDataset(data.Dataset):
                 self.json_list.append(json.loads(line))
         self._load_dataset()
 
-    
 
-    def _load_dataset(self):        
+    def _load_dataset(self):
         # Loading json files into namespace object
         # Note that if labels do not exist, they are replaced with -1        
         self.data = SimpleNamespace(ids=None, imgs=None, labels=None, text=None)
@@ -86,9 +84,11 @@ class MemeDataset(data.Dataset):
                                  f'It should be located at {img_feature_loc} and {img_feature_info_loc}')
 
         # YOUR CODE HERE:  Iterate over data ids and load img_feats and img_pos_feats into lists (defined above) using _load_img_feature
-        self.data.img_feat, self.data.img_feat_info = [], []
+        self.data.img_feat, self.data.img_pos_feat = [], []
         for idx in self.data.ids:
             img_feat, img_pos_feat = self._load_img_feature(idx)
+            self.data.img_feat.append(img_feat)
+            self.data.img_pos_feat.append(img_pos_feat)
 
         # Preprocess text if selected
         if self.text_preprocess is not None:
@@ -170,16 +170,28 @@ class MemeDataset(data.Dataset):
             img_pos_features = [sample['img_pos_feat'] for sample in samples]
             texts = [sample['text'] for sample in samples]
             labels = [sample['label'] for sample in samples]
+            ids = [int(sample['data_id']) for sample in samples]
 
+            temp = torch.zeros(100)
+            print(pad_sequence(img_features))
+            # torch.nn.functional.F.pad(seq, pad=(0, 2), mode='constant', value=0)
             # YOUR CODE HERE:  Pad 'img_feat' and 'img_pos_feat' tensors using pad_sequence
+            max_value = 100
+            for i in range(len(img_features)):
+                if img_features[i].shape[0] != max_value:
+                    while img_features[i].shape[0] != max_value:
+                        img_features[i]
 
+            print(img_features[0].shape)
+            print(img_pos_features[0].shape)
 
             # Tokenize and pad text
             if self.text_padding is not None:
                 texts = self.text_padding(texts)
-            
+
+
             # YOUR CODE HERE:  Stack labels and data_ids into tensors (list --> tensor)
-            
+            labels, data_ids = torch.tensor(ids), torch.tensor(labels)
 
             # Text input
             input_ids = texts['input_ids']
