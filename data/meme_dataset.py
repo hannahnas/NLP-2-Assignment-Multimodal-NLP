@@ -8,6 +8,7 @@ import logging
 import matplotlib.pyplot as plt
 import json
 from torch.nn.utils.rnn import pad_sequence
+from utils.utils import get_attention_mask
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s - %(message)s',
                     datefmt='%d/%m/%Y %I:%M:%S %p',
@@ -171,19 +172,11 @@ class MemeDataset(data.Dataset):
             texts = [sample['text'] for sample in samples]
             labels = [sample['label'] for sample in samples]
             ids = [int(sample['data_id']) for sample in samples]
-
-            temp = torch.zeros(100)
-            print(pad_sequence(img_features))
+ 
             # torch.nn.functional.F.pad(seq, pad=(0, 2), mode='constant', value=0)
             # YOUR CODE HERE:  Pad 'img_feat' and 'img_pos_feat' tensors using pad_sequence
-            max_value = 100
-            for i in range(len(img_features)):
-                if img_features[i].shape[0] != max_value:
-                    while img_features[i].shape[0] != max_value:
-                        img_features[i]
-
-            print(img_features[0].shape)
-            print(img_pos_features[0].shape)
+            img_feat = pad_sequence(torch.tensor(img_features), batch_first=True)
+            img_pos_feat = pad_sequence(torch.tensor(img_pos_features), batch_first=True)
 
             # Tokenize and pad text
             if self.text_padding is not None:
