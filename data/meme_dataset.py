@@ -6,6 +6,7 @@ from PIL import Image
 from types import SimpleNamespace
 import logging
 import matplotlib.pyplot as plt
+from torch.nn.utils.rnn import pad_sequence
 import json
 try:
     from utils.utils import get_attention_mask, get_gather_index
