@@ -7,8 +7,12 @@ from types import SimpleNamespace
 import logging
 import matplotlib.pyplot as plt
 import json
-from torch.nn.utils.rnn import pad_sequence
-from utils.utils import get_attention_mask
+try:
+    from utils.utils import get_attention_mask, get_gather_index
+except ModuleNotFoundError as e:
+    import sys
+    sys.path.append("../")
+    from utils.utils import get_attention_mask, get_gather_index
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s - %(message)s',
                     datefmt='%d/%m/%Y %I:%M:%S %p',
