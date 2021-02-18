@@ -35,7 +35,7 @@ def standard_metrics_binary(probs, labels, threshold=0.5, add_aucroc=True, add_o
 
     # Check for numerical stability, otherwise we divide by zero if all labels are zero
     if torch.count_nonzero(labels).item() == 0:
-        recall = 0
+        recall = 1
     else:
         recall = correct / torch.count_nonzero(labels).item()
 
