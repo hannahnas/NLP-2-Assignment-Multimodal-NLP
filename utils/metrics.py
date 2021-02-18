@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from statistics import mean
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, recall_score, precision_score, f1_score, accuracy_score
 import logging
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s - %(message)s',
@@ -29,19 +29,11 @@ def standard_metrics_binary(probs, labels, threshold=0.5, add_aucroc=True, add_o
     """
     preds = torch.where(probs < torch.tensor(threshold), torch.tensor(0), torch.tensor(1))
 
-    correct = torch.count_nonzero(preds.eq(labels))
-    true_pos = preds[labels == 1].sum()
-    relevant = labels.sum()
-    acc = correct / len(probs)
+    recall = recall_score(labels, preds)
+    precision = precision_score(labels, preds)
+    f1 = f1_score(labels, preds)
+    acc = accuracy_score(labels, preds)
 
-    # Check for numerical stability, otherwise we divide by zero if all labels are zero
-    if relevant == 0:
-        recall = 1
-    else:
-        recall = true_pos / relevant
-
-    precision = true_pos / preds.sum()
-    f1 = 2 * (precision * recall) / (precision + recall)
     aucroc_score = aucroc(labels, preds)
     metrics = {'accuracy': acc,
                'recall': recall,
