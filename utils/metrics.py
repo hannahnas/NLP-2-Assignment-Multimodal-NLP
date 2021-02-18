@@ -1,8 +1,8 @@
 import torch
 import torch.nn.functional as F
-import numpy as np 
-import matplotlib.pyplot as plt 
-import seaborn as sns 
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from statistics import mean
 from sklearn.metrics import roc_auc_score
 import logging
@@ -29,15 +29,17 @@ def standard_metrics_binary(probs, labels, threshold=0.5, add_aucroc=True, add_o
     """
     preds = torch.where(probs < threshold, 0, 1)
     correct = torch.count_nonzero(preds.eq(labels))
-    acc = correct/len(probs)
-    recall = correct/torch.count_nonzero(labels)
-    precision = correct/torch.count_nonzero(preds)
-    f1 = 2 * (precision*recall)/(precision+recall)
-    auroc = 'joe'
-    # YOUR CODE HERE:  write code to calculate accuracy, precision, recall, F1 and auroc. Return in the dictionary 'metrics'
-
+    acc = correct / len(probs)
+    recall = correct / torch.count_nonzero(labels)
+    precision = correct / torch.count_nonzero(preds)
+    f1 = 2 * (precision * recall) / (precision + recall)
+    aucroc = aucroc(labels, preds)
+    metrics = {'accuracy': acc,
+               'recall': recall,
+               'precision': precision,
+               'F1': f1,
+               'AUCROC': aucroc}
     return metrics
-
 
 
 # OPTIONAL:  you can also optimize the cut-off threshold for the binary classification task (default=0.5)
@@ -47,7 +49,7 @@ def find_optimal_threshold(probs, labels, metric="accuracy"):
     It is conditioned on a metric ("accuracy", "F1", ...). Probabilities and labels are expected to be pytorch tensors.
     """
     # YOUR CODE HERE:  write code to find the best_threshold from a range of tested ones optimizing for the given metric
-    
+
     return best_threshold
 
 
@@ -56,7 +58,7 @@ def aucroc(probs, labels):
     Given predicted probabilities and labels, returns the AUCROC score used in the Facebook Meme Challenge.
     Inputs are expected to be pytorch tensors (can be cuda or cpu)
     """
-    # YOUR CODE HERE:  compute the aucroc_score and return it
+    aucroc_score = roc_auc_score(labels, probs)
     return aucroc_score
 
 
