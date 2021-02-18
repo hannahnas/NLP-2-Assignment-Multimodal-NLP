@@ -27,19 +27,20 @@ def standard_metrics_binary(probs, labels, threshold=0.5, add_aucroc=True, add_o
     Returned values are floats (no tensors) in the dictionary 'metrics'.
     Probabilities and labels are expected to be pytorch tensors.
     """
-    preds = torch.where(probs < threshold, 0, 1)
+    preds = torch.where(probs < torch.tensor(threshold), torch.tensor(0), torch.tensor(1))
 
-    # true positives
     correct = torch.count_nonzero(preds.eq(labels))
+    true_pos = preds[labels == 1].sum()
+    relevant = labels.sum()
     acc = correct / len(probs)
 
     # Check for numerical stability, otherwise we divide by zero if all labels are zero
-    if torch.count_nonzero(labels).item() == 0:
+    if relevant == 0:
         recall = 1
     else:
-        recall = correct / torch.count_nonzero(labels).item()
+        recall = true_pos / relevant
 
-    precision = correct / torch.count_nonzero(preds)
+    precision = true_pos / preds.sum()
     f1 = 2 * (precision * recall) / (precision + recall)
     aucroc_score = aucroc(labels, preds)
     metrics = {'accuracy': acc,
