@@ -28,17 +28,25 @@ def standard_metrics_binary(probs, labels, threshold=0.5, add_aucroc=True, add_o
     Probabilities and labels are expected to be pytorch tensors.
     """
     preds = torch.where(probs < threshold, 0, 1)
+
+    # true positives
     correct = torch.count_nonzero(preds.eq(labels))
     acc = correct / len(probs)
-    recall = correct / torch.count_nonzero(labels)
+
+    # Check for numerical stability, otherwise we divide by zero if all labels are zero
+    if torch.count_nonzero(labels).item() == 0:
+        recall = 0
+    else:
+        recall = correct / torch.count_nonzero(labels).item()
+
     precision = correct / torch.count_nonzero(preds)
     f1 = 2 * (precision * recall) / (precision + recall)
-    aucroc = aucroc(labels, preds)
+    aucroc_score = aucroc(labels, preds)
     metrics = {'accuracy': acc,
                'recall': recall,
                'precision': precision,
                'F1': f1,
-               'AUCROC': aucroc}
+               'AUCROC': aucroc_score}
     return metrics
 
 
@@ -49,7 +57,6 @@ def find_optimal_threshold(probs, labels, metric="accuracy"):
     It is conditioned on a metric ("accuracy", "F1", ...). Probabilities and labels are expected to be pytorch tensors.
     """
     # YOUR CODE HERE:  write code to find the best_threshold from a range of tested ones optimizing for the given metric
-
     return best_threshold
 
 
