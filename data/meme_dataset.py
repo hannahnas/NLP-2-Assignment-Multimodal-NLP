@@ -71,8 +71,12 @@ class MemeDataset(data.Dataset):
         self.data = SimpleNamespace(ids=None, imgs=None, labels=None, text=None)
 
         # YOUR CODE HERE:  load the object lists from self.json_list
+        if 'label' not in self.json_list[0].keys():
+            self.data.labels = len(self.json_list) * [-1]
+        else:
+            self.data.labels = [entry['label'] for entry in self.json_list]
+
         self.data.ids = [self._expand_id(str(entry['id'])) for entry in self.json_list]
-        self.data.labels = [entry['label'] for entry in self.json_list]
         self.data.texts = [entry['text'] for entry in self.json_list]
         self.data.imgs = [entry['img'] for entry in self.json_list]
 
@@ -175,6 +179,7 @@ class MemeDataset(data.Dataset):
             img_features = [sample['img_feat'] for sample in samples]
             img_pos_features = [sample['img_pos_feat'] for sample in samples]
             texts = [sample['text'] for sample in samples]
+
             labels = [sample['label'] for sample in samples]
             ids = [int(sample['data_id']) for sample in samples]
  

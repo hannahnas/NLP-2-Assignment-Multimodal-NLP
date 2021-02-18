@@ -6,3 +6,7 @@ model/__pycache__/
 utils/__pycache__/
 
 .ipynb_checkpoints/
+
+vis_checkpoints/
+
+model_checkpoints/

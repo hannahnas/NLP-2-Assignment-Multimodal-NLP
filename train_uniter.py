@@ -96,6 +96,7 @@ class TrainerUniter():
         # If this argument is False, it will load the model file saved by you after fine-tuning
         if self.pretrained_model_file:
             checkpoint = torch.load(self.pretrained_model_file)
+
             LOGGER.info('Using pretrained UNITER base model {}'.format(self.pretrained_model_file))
             base_model = UniterForPretraining.from_pretrained(self.config['config'],
                                                               state_dict=checkpoint['model_state_dict'],
@@ -487,7 +488,8 @@ if __name__ == '__main__':
                         help='If selected, model checkpoints will be deleted after finishing testing.')
     parser.add_argument('--config', type=str, default='./config/uniter-base.json',
                         help='JSON config file')
-    parser.add_argument('--feature_path', type=str, default='./dataset/img_feats',
+    # changed to own_features!
+    parser.add_argument('--feature_path', type=str, default='./dataset/own_features',
                         help='Path to image features')
 
     # Load pretrained model
